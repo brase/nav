@@ -290,7 +290,10 @@ class _MainViewState extends State<MainView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       RaisedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _formKey.currentState.reset();
+                          Navigator.of(context).pop();
+                        },
                         child: Text("Cancel")
                       ),
                       SizedBox(width: 25),
