@@ -216,6 +216,10 @@ class _MainViewState extends State<MainView> {
         totalKilometers: 69.3, bearing: 90, distance: 200, pictureNumber: 56)
   ];
 
+  final _formKey = GlobalKey<FormState>();
+
+  final addModel = WaypointProjection();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -238,6 +242,7 @@ class _MainViewState extends State<MainView> {
           return Scaffold(
             appBar: AppBar(title: Text("New projection")),
             body: Form(
+              key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -249,6 +254,7 @@ class _MainViewState extends State<MainView> {
                       labelText: "Total Distance",
                       border: OutlineInputBorder(),
                     ),
+                    onSaved: (newValue) => addModel.totalKilometers = double.parse(newValue),
                   ),
                   SizedBox(height: 20),
                   TextFormField(
@@ -258,29 +264,48 @@ class _MainViewState extends State<MainView> {
                       labelText: "Picture Number",
                       border: OutlineInputBorder(),
                     ),
+                    onSaved: (newValue) => addModel.pictureNumber = int.parse(newValue),
                   ),
                   SizedBox(height: 20),
                   TextFormField(
                     keyboardType: TextInputType.number,
                     autocorrect: false,
                     decoration: InputDecoration(
-                      labelText: "Bearing",
+                      labelText: "Bearing (°)",
                       border: OutlineInputBorder(),
                     ),
+                    onSaved: (newValue) => addModel.bearing = double.parse(newValue),
                   ),
                   SizedBox(height: 20),
                   TextFormField(
                     keyboardType: TextInputType.number,
                     autocorrect: false,
                     decoration: InputDecoration(
-                      labelText: "Distance",
+                      labelText: "Distance (m)",
                       border: OutlineInputBorder(),
                     ),
+                    onSaved: (newValue) => addModel.distance = double.parse(newValue),
                   ),
-                  Wrap(
-                    direction: Axis.horizontal,
-                    children: [
-                      Container(child: RaisedButton(child: Text("Save"),),)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      RaisedButton(
+                        onPressed: () {},
+                        child: Text("Cancel")
+                      ),
+                      SizedBox(width: 25),
+                      RaisedButton(
+                        onPressed: () {
+                          if(_formKey.currentState.validate()){
+                            _formKey.currentState.save();
+
+                            _projections.add(addModel);
+                            setState(() {});
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: Text("Save")
+                      ),
                     ],)
                 ],
               ),
