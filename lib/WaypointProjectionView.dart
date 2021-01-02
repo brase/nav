@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'package:geo/geo.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -74,9 +75,10 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
               child: RaisedButton(
                 child: Text("Share"),
                 onPressed: () async {
+                  final LatLng destination = _computeDestination(_pos.latitude, _pos.longitude, _projection.bearing, _projection.distance);
                   final geoUrl = Uri(
                     scheme: "geo",
-                    path: "${_pos.latitude},${_pos.longitude}"
+                    path: "${destination.lat},${destination.lng}"
                   );
                   developer.log(geoUrl.toString());
                     await _launchURL(geoUrl.toString());
@@ -93,6 +95,10 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
       } else {
         throw 'Could not launch $url';
       }
+  }
+
+  _computeDestination(double lat, double long, double heading, double distance){
+    return computeOffset(LatLng(lat, long), distance, heading);
   }
 
   @override
