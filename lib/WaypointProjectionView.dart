@@ -1,11 +1,8 @@
 import 'dart:async';
-
 import 'dart:developer' as developer;
-
-import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WaypointProjection {
   WaypointProjection(
@@ -43,7 +40,9 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
   Widget build(BuildContext context) {
     _updateLocationTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
       await Geolocator.getCurrentPosition().then((value) => {_pos = value});
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
 
     return Scaffold(
@@ -71,8 +70,29 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
             Container(
               child: Text("Accuracy.: ${_pos.accuracy}"),
             ),
+            Container(
+              child: RaisedButton(
+                child: Text("Share"),
+                onPressed: () async {
+                  final geoUrl = Uri(
+                    scheme: "geo",
+                    path: "${_pos.latitude},${_pos.longitude}"
+                  );
+                  developer.log(geoUrl.toString());
+                    await _launchURL(geoUrl.toString());
+                  }
+              ),
+            )
           ]),
         ));
+  }
+
+  _launchURL(String url) async {
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
   }
 
   @override
