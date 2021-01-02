@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'dart:developer' as developer;
+
 import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,9 +35,17 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
   }
 
   WaypointProjection _projection;
+  Position _pos = Position();
+
+  Timer _updateLocationTimer;
 
   @override
   Widget build(BuildContext context) {
+    _updateLocationTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+      await Geolocator.getCurrentPosition().then((value) => {_pos = value});
+      setState(() {});
+    });
+
     return Scaffold(
         appBar: AppBar(
           title: Text("Projection"),
@@ -53,12 +63,21 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
             Container(
                 child: Text("Distance: ${_projection.distance.toString()}")),
             Container(
-              child: Text("Lat.: "),
+              child: Text("Lat.: ${_pos.latitude}"),
             ),
             Container(
-              child: Text("Long.: "),
+              child: Text("Long.: ${_pos.longitude}"),
+            ),
+            Container(
+              child: Text("Accuracy.: ${_pos.accuracy}"),
             ),
           ]),
         ));
+  }
+
+  @override
+  void dispose() {
+    _updateLocationTimer.cancel();
+    super.dispose();
   }
 }
