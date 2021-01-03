@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:nav/WaypointProjectionView.dart';
 
-import 'WaypointProjectionView.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+
+import 'DataAccess.dart';
 import 'MainView.dart';
 
 /// Defines the main theme color.
@@ -13,11 +15,37 @@ final MaterialColor themeMaterialColor =
     BaseflowPluginExample.createMaterialColor(
         const Color.fromRGBO(48, 49, 60, 1));
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  // Avoid errors caused by flutter upgrade.
+  // Importing 'package:flutter/widgets.dart' is required.
+  WidgetsFlutterBinding.ensureInitialized();
+  // Open the database and store the reference.
+  final Future<Database> database = openDatabase(
+      // Set the path to the database. Note: Using the `join` function from the
+      // `path` package is best practice to ensure the path is correctly
+      // constructed for each platform.
+      join(await getDatabasesPath(), 'rallynav.db'), onCreate: (db, version) {
+    return db.execute(
+      '''CREATE TABLE "WaypointProjection" (
+	        "id"	INTEGER,
+          "totalKilometers"	REAL,
+          "pictureNumber"	INTEGER,
+          "bearing"	REAL,
+          "distance"	REAL,
+          PRIMARY KEY("id"));''',
+    );
+  }, version: 1);
+
+  final DataAccess dataAccess = DataAccess(database);
+
+  runApp(MyApp(dataAccess: dataAccess,));
 }
 
 class MyApp extends StatelessWidget {
+  final DataAccess dataAccess;
+
+  MyApp({this.dataAccess});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,7 +53,7 @@ class MyApp extends StatelessWidget {
       // theme: ThemeData(
       //   primaryColor: Colors.white
       // ),
-      home: MainView(),
+      home: MainView(dataAccess),
     );
   }
 }

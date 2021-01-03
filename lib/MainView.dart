@@ -1,24 +1,26 @@
+import 'dart:async';
+import 'dart:core';
+
 import 'package:flutter/material.dart';
+import 'DataAccess.dart';
 import 'WaypointProjectionView.dart';
 
 class MainView extends StatefulWidget {
+  final DataAccess _dataAccess;
+
+  MainView(this._dataAccess);
+
   @override
-  _MainViewState createState() => _MainViewState();
+  _MainViewState createState() => _MainViewState(_dataAccess);
 }
 
 class _MainViewState extends State<MainView> {
-  final List<WaypointProjection> _projections = [
-    WaypointProjection(
-        totalKilometers: 21.3, bearing: 228, distance: 1200, pictureNumber: 32),
-    WaypointProjection(
-        totalKilometers: 42.3, bearing: 212, distance: 2900, pictureNumber: 45),
-    WaypointProjection(
-        totalKilometers: 69.3, bearing: 90, distance: 200, pictureNumber: 56)
-  ];
-
+  final DataAccess _dataAccess;
   final _formKey = GlobalKey<FormState>();
 
   final addModel = WaypointProjection();
+
+  _MainViewState(this._dataAccess);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class _MainViewState extends State<MainView> {
   }
 
   _addProjection() {
-    Navigator.of(context)
+    Navigator.of(this.context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return Scaffold(
         appBar: AppBar(title: Text("New projection")),
@@ -100,11 +102,12 @@ class _MainViewState extends State<MainView> {
                       child: Text("Cancel")),
                   SizedBox(width: 25),
                   RaisedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState.validate()) {
                           _formKey.currentState.save();
 
-                          setState(() => _projections.add(addModel));
+                          await _dataAccess.insertWaypointProjection(addModel);
+                          setState(() {});
 
                           Navigator.of(context).pop();
                         }
@@ -120,20 +123,28 @@ class _MainViewState extends State<MainView> {
   }
 
   Widget _buildProjectionsView() {
-    return ListView.builder(
-        padding: EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-          if (i.isOdd) return Divider();
+    return FutureBuilder<List<WaypointProjection>>(
+      future: _dataAccess.waypointProjecions(),
+      builder: (context, AsyncSnapshot<List<WaypointProjection>> snapshot) {
+        if (snapshot.hasData) {
 
-          final index = i ~/ 2;
-          return _buildProjectionView(context, index);
-        },
-        itemCount: _projections.length * 2);
+          return ListView.builder(
+              padding: EdgeInsets.all(16.0),
+              itemBuilder: (context, i) {
+                if (i.isOdd) return Divider();
+
+                final index = i ~/ 2;
+                return _buildProjectionView(context, snapshot.data[index]);
+              },
+              itemCount: snapshot.data.length * 2);
+        } else {
+          return CircularProgressIndicator();
+        }
+      },
+    );
   }
 
-  Widget _buildProjectionView(BuildContext context, int index) {
-    final projection = _projections[index];
-
+  Widget _buildProjectionView(BuildContext context, WaypointProjection projection) {
     return ListTile(
       title: Text(projection.totalKilometers.toString()),
       subtitle: Text(
@@ -143,7 +154,7 @@ class _MainViewState extends State<MainView> {
   }
 
   void _openProjection(WaypointProjection projection) {
-    Navigator.of(context)
+    Navigator.of(this.context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return WaypointProjectionView(projection);
     }));

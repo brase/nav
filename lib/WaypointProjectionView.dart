@@ -9,10 +9,33 @@ class WaypointProjection {
   WaypointProjection(
       {this.distance, this.bearing, this.pictureNumber, this.totalKilometers});
 
+  WaypointProjection.fromMap(Map<String, dynamic> map){
+    this.id = map["id"];
+    this.totalKilometers = map["totalKilometers"];
+    this.pictureNumber = map["pictureNumber"];
+    this.bearing = map["bearing"];
+    this.distance = map["distance"];
+  }
+
+  int id;
   double totalKilometers;
   int pictureNumber;
   double bearing;
   double distance;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id' : id,
+      'totalKilometers' : totalKilometers,
+      'pictureNumber' : pictureNumber,
+      'bearing' : bearing,
+      'distance' : distance
+    };
+  }
+
+
+
+  final String TableName = "WaypointProjection";
 }
 
 class WaypointProjectionView extends StatefulWidget {
