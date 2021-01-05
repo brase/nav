@@ -40,6 +40,8 @@ class _MainViewState extends State<MainView> {
   _addProjection() {
     Navigator.of(this.context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+
+
       return Scaffold(
         appBar: AppBar(title: Text("New projection")),
         body: Form(
@@ -55,6 +57,7 @@ class _MainViewState extends State<MainView> {
                   labelText: "Total Distance",
                   border: OutlineInputBorder(),
                 ),
+                validator: _validateDouble,
                 onSaved: (newValue) =>
                     addModel.totalKilometers = double.parse(newValue),
               ),
@@ -62,6 +65,7 @@ class _MainViewState extends State<MainView> {
               TextFormField(
                 keyboardType: TextInputType.number,
                 autocorrect: false,
+                validator: _validateInt,
                 decoration: InputDecoration(
                   labelText: "Picture Number",
                   border: OutlineInputBorder(),
@@ -77,6 +81,7 @@ class _MainViewState extends State<MainView> {
                   labelText: "Bearing (°)",
                   border: OutlineInputBorder(),
                 ),
+                validator: _validateDouble,
                 onSaved: (newValue) =>
                     addModel.bearing = double.parse(newValue),
               ),
@@ -88,6 +93,7 @@ class _MainViewState extends State<MainView> {
                   labelText: "Distance (m)",
                   border: OutlineInputBorder(),
                 ),
+                validator: _validateDouble,
                 onSaved: (newValue) =>
                     addModel.distance = double.parse(newValue),
               ),
@@ -158,5 +164,29 @@ class _MainViewState extends State<MainView> {
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return WaypointProjectionView(projection);
     }));
+  }
+
+  String _validateDouble(String value){
+    if(value.isEmpty){
+      return "Please enter some value.";
+    }
+
+    if(double.tryParse(value) == null){
+      return "Please enter a number.";
+    }
+
+    return null;
+  }
+
+  String _validateInt(String value){
+    if(value.isEmpty){
+      return "Please enter some value.";
+    }
+
+    if(int.tryParse(value) == null){
+      return "Please enter a number.";
+    }
+
+    return null;
   }
 }
