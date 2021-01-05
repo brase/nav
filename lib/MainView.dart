@@ -81,7 +81,18 @@ class _MainViewState extends State<MainView> {
                   labelText: "Bearing (°)",
                   border: OutlineInputBorder(),
                 ),
-                validator: _validateDouble,
+                validator: (value) {
+                  var result = _validateDouble(value);
+                  if(result != null) {
+                    return result;
+                  }
+
+                  if(double.parse(value) > 360){
+                    return "Please enter a valid bearing between 0 and 360.";
+                  }
+
+                  return null;
+                },
                 onSaved: (newValue) =>
                     addModel.bearing = double.parse(newValue),
               ),
