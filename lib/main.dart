@@ -10,6 +10,8 @@ import 'package:sqflite/sqflite.dart';
 import 'DataAccess.dart';
 import 'MainView.dart';
 
+import 'dart:developer' as developer;
+
 /// Defines the main theme color.
 final MaterialColor themeMaterialColor =
     BaseflowPluginExample.createMaterialColor(
@@ -19,18 +21,23 @@ void main() async {
   // Avoid errors caused by flutter upgrade.
   // Importing 'package:flutter/widgets.dart' is required.
   WidgetsFlutterBinding.ensureInitialized();
+
+  final dbFolder = await getDatabasesPath();
+  final dbPath = join(dbFolder, 'rallynav.db');
+  developer.log("DB Path: $dbPath");
+
   // Open the database and store the reference.
   final Future<Database> database = openDatabase(
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'rallynav.db'), onCreate: (db, version) {
+      dbPath, onCreate: (db, version) {
     return db.execute(
       '''CREATE TABLE "WaypointProjection" (
 	        "id"	INTEGER,
           "totalKilometers"	REAL,
           "pictureNumber"	INTEGER,
-          "bearing"	REAL,
+          "heading"	REAL,
           "distance"	REAL,
           PRIMARY KEY("id"));''',
     );

@@ -52,7 +52,7 @@ class _MainViewState extends State<MainView> {
                 keyboardType: TextInputType.number,
                 autocorrect: false,
                 decoration: InputDecoration(
-                  labelText: "Total Distance",
+                  labelText: "Total Distance (km)",
                   border: OutlineInputBorder(),
                 ),
                 validator: _validateDouble,
@@ -76,7 +76,7 @@ class _MainViewState extends State<MainView> {
                 keyboardType: TextInputType.number,
                 autocorrect: false,
                 decoration: InputDecoration(
-                  labelText: "Bearing (°)",
+                  labelText: "heading (°)",
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -86,20 +86,20 @@ class _MainViewState extends State<MainView> {
                   }
 
                   if (double.parse(value) > 360) {
-                    return "Please enter a valid bearing between 0 and 360.";
+                    return "Please enter a valid heading between 0 and 360.";
                   }
 
                   return null;
                 },
                 onSaved: (newValue) =>
-                    addModel.bearing = double.parse(newValue),
+                    addModel.heading = double.parse(newValue),
               ),
               SizedBox(height: 20),
               TextFormField(
                 keyboardType: TextInputType.number,
                 autocorrect: false,
                 decoration: InputDecoration(
-                  labelText: "Distance (m)",
+                  labelText: "Distance (km)",
                   border: OutlineInputBorder(),
                 ),
                 validator: _validateDouble,
@@ -142,6 +142,7 @@ class _MainViewState extends State<MainView> {
       future: _dataAccess.waypointProjecions(),
       builder: (context, AsyncSnapshot<List<WaypointProjection>> snapshot) {
         if (snapshot.hasData) {
+          snapshot.data.sort((wp1, wp2){return wp1.totalKilometers.compareTo(wp2.totalKilometers);});
           return ListView.separated(
               separatorBuilder: (context, index) => Divider(
                     color: Colors.grey[950],
@@ -165,9 +166,9 @@ class _MainViewState extends State<MainView> {
       background: stackBehindDismiss(),
       key: ObjectKey(projection),
       child: ListTile(
-        title: Text(projection.totalKilometers.toString()),
+        title: Text("${projection.totalKilometers} km"),
         subtitle: Text(
-            "Bearing: ${projection.bearing}; Distance ${projection.distance}"),
+            "Heading: ${projection.heading}° Distance: ${projection.distance} km"),
         onTap: () => _openProjection(projection),
       ),
       onDismissed: (direction) async {

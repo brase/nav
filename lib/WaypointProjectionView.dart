@@ -7,33 +7,31 @@ import 'package:url_launcher/url_launcher.dart';
 
 class WaypointProjection {
   WaypointProjection(
-      {this.distance, this.bearing, this.pictureNumber, this.totalKilometers});
+      {this.distance, this.heading, this.pictureNumber, this.totalKilometers});
 
-  WaypointProjection.fromMap(Map<String, dynamic> map){
+  WaypointProjection.fromMap(Map<String, dynamic> map) {
     this.id = map["id"];
     this.totalKilometers = map["totalKilometers"];
     this.pictureNumber = map["pictureNumber"];
-    this.bearing = map["bearing"];
+    this.heading = map["heading"];
     this.distance = map["distance"];
   }
 
   int id;
   double totalKilometers;
   int pictureNumber;
-  double bearing;
+  double heading;
   double distance;
 
   Map<String, dynamic> toMap() {
     return {
-      'id' : id,
-      'totalKilometers' : totalKilometers,
-      'pictureNumber' : pictureNumber,
-      'bearing' : bearing,
-      'distance' : distance
+      'id': id,
+      'totalKilometers': totalKilometers,
+      'pictureNumber': pictureNumber,
+      'heading': heading,
+      'distance': distance
     };
   }
-
-
 
   static String get tableName => "WaypointProjection";
 }
@@ -62,29 +60,49 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
 
   @override
   Widget build(BuildContext context) {
-    _updateLocationTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+    _updateLocationTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
       await Geolocator.getCurrentPosition().then((value) => {_pos = value});
       if (mounted) {
         setState(() {});
       }
     });
 
+    final valuesStyle = TextStyle(fontSize: 36);
+
     return Scaffold(
         appBar: AppBar(
-          title: Text("Projection"),
+          title: Text("Project Waypoint"),
         ),
         body: Container(
           child: Column(children: [
             Container(
-                child: Text(
-                    "Total Distance: ${_projection.totalKilometers.toString()}")),
+                child: Center(
+                    child: Text("${_projection.totalKilometers.toString()} km",
+                        style: TextStyle(
+                            fontSize: 80, fontWeight: FontWeight.bold)))),
             Container(
-                child: Text(
-                    "Picture Number: ${_projection.pictureNumber.toString()}")),
-            Container(
-                child: Text("Bearing: ${_projection.bearing.toString()}")),
-            Container(
-                child: Text("Distance: ${_projection.distance.toString()}")),
+                margin: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween ,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                            child: Text(
+                              "C = ${_projection.heading.toString()}°",
+                              style: valuesStyle,)),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Container(
+                            child:
+                                Text("L = ${_projection.distance.toString()} km", style: valuesStyle,)),
+                      ],
+                    )
+                  ],
+            )),
             Container(
               child: Text("Lat.: ${_pos.latitude}"),
             ),
@@ -96,36 +114,40 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
             ),
             Container(
               child: RaisedButton(
-                child: Text("Share"),
-                onPressed: () async {
-                  final LatLng destination = _computeDestination(_pos.latitude, _pos.longitude, _projection.bearing, _projection.distance);
-                  final geoUrl = Uri(
-                    scheme: "geo",
-                    path: "${destination.lat},${destination.lng}"
-                  );
-                  developer.log(geoUrl.toString());
+                  child: Text("Share"),
+                  onPressed: () async {
+                    final LatLng destination = _computeDestination(
+                        _pos.latitude,
+                        _pos.longitude,
+                        _projection.heading,
+                        _projection.distance);
+                    final geoUrl = Uri(
+                        scheme: "geo",
+                        path: "${destination.lat},${destination.lng}");
+                    developer.log(geoUrl.toString());
                     await _launchURL(geoUrl.toString());
-                  }
-              ),
+                  }),
             )
           ]),
         ));
   }
 
   _launchURL(String url) async {
-      if (await canLaunch(url)) {
-        await launch(url);
-      } else {
-        throw 'Could not launch $url';
-      }
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
-  _computeDestination(double lat, double long, double heading, double distance){
-    return computeOffset(LatLng(lat, long), distance, heading);
+  _computeDestination(
+      double lat, double long, double heading, double distance) {
+    return computeOffset(LatLng(lat, long), distance * 1000, heading);
   }
 
   @override
   void dispose() {
+    developer.log("disposed");
     _updateLocationTimer.cancel();
     super.dispose();
   }
