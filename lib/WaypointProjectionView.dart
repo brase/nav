@@ -35,7 +35,7 @@ class WaypointProjection {
 
 
 
-  final String TableName = "WaypointProjection";
+  static String get tableName => "WaypointProjection";
 }
 
 class WaypointProjectionView extends StatefulWidget {

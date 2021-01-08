@@ -40,8 +40,6 @@ class _MainViewState extends State<MainView> {
   _addProjection() {
     Navigator.of(this.context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-
-
       return Scaffold(
         appBar: AppBar(title: Text("New projection")),
         body: Form(
@@ -83,11 +81,11 @@ class _MainViewState extends State<MainView> {
                 ),
                 validator: (value) {
                   var result = _validateDouble(value);
-                  if(result != null) {
+                  if (result != null) {
                     return result;
                   }
 
-                  if(double.parse(value) > 360){
+                  if (double.parse(value) > 360) {
                     return "Please enter a valid bearing between 0 and 360.";
                   }
 
@@ -144,16 +142,17 @@ class _MainViewState extends State<MainView> {
       future: _dataAccess.waypointProjecions(),
       builder: (context, AsyncSnapshot<List<WaypointProjection>> snapshot) {
         if (snapshot.hasData) {
-
-          return ListView.builder(
+          return ListView.separated(
+              separatorBuilder: (context, index) => Divider(
+                    color: Colors.grey[950],
+                  ),
               padding: EdgeInsets.all(16.0),
               itemBuilder: (context, i) {
-                if (i.isOdd) return Divider();
-
-                final index = i ~/ 2;
-                return _buildProjectionView(context, snapshot.data[index]);
+                return _buildProjectionView(context, snapshot.data[i], (wp) {
+                  snapshot.data.remove(wp);
+                });
               },
-              itemCount: snapshot.data.length * 2);
+              itemCount: snapshot.data.length);
         } else {
           return CircularProgressIndicator();
         }
@@ -161,12 +160,40 @@ class _MainViewState extends State<MainView> {
     );
   }
 
-  Widget _buildProjectionView(BuildContext context, WaypointProjection projection) {
-    return ListTile(
-      title: Text(projection.totalKilometers.toString()),
-      subtitle: Text(
-          "Bearing: ${projection.bearing}; Distance ${projection.distance}"),
-      onTap: () => _openProjection(projection),
+  Widget _buildProjectionView(BuildContext context, WaypointProjection projection, delete) {
+    return Dismissible(
+      background: stackBehindDismiss(),
+      key: ObjectKey(projection),
+      child: ListTile(
+        title: Text(projection.totalKilometers.toString()),
+        subtitle: Text(
+            "Bearing: ${projection.bearing}; Distance ${projection.distance}"),
+        onTap: () => _openProjection(projection),
+      ),
+      onDismissed: (direction) async {
+        await _dataAccess.deleteWaypointProjection(projection.id);
+        setState(() {delete(projection);});
+        Scaffold.of(context).showSnackBar(SnackBar(
+            content: Text("Item deleted"),
+            action: SnackBarAction(
+                label: "UNDO",
+                onPressed: () async {
+                  await _dataAccess.insertWaypointProjection(projection);
+                  setState(() {});
+                })));
+      },
+    );
+  }
+
+  Widget stackBehindDismiss() {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: EdgeInsets.only(right: 20.0),
+      color: Colors.red,
+      child: Icon(
+        Icons.delete,
+        color: Colors.white,
+      ),
     );
   }
 
@@ -177,24 +204,24 @@ class _MainViewState extends State<MainView> {
     }));
   }
 
-  String _validateDouble(String value){
-    if(value.isEmpty){
+  String _validateDouble(String value) {
+    if (value.isEmpty) {
       return "Please enter some value.";
     }
 
-    if(double.tryParse(value) == null){
+    if (double.tryParse(value) == null) {
       return "Please enter a number.";
     }
 
     return null;
   }
 
-  String _validateInt(String value){
-    if(value.isEmpty){
+  String _validateInt(String value) {
+    if (value.isEmpty) {
       return "Please enter some value.";
     }
 
-    if(int.tryParse(value) == null){
+    if (int.tryParse(value) == null) {
       return "Please enter a number.";
     }
 

@@ -10,7 +10,7 @@ class DataAccess {
     final Database db = await _database;
 
     await db.insert(
-      proj.TableName,
+      WaypointProjection.tableName,
       proj.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -19,10 +19,15 @@ class DataAccess {
   // A method that retrieves all the dogs from the dogs table.
   Future<List<WaypointProjection>> waypointProjecions() async {
     final Database db = await _database;
-    final List<Map<String, dynamic>> maps = await db.query('WaypointProjection');
+    final List<Map<String, dynamic>> maps = await db.query(WaypointProjection.tableName);
 
     return List.generate(maps.length, (i) {
       return WaypointProjection.fromMap(maps[i]);
     });
+  }
+
+  Future<void> deleteWaypointProjection(id) async {
+    final Database db = await _database;
+    await db.delete(WaypointProjection.tableName, where: "id = ?", whereArgs: [id]);
   }
 }
