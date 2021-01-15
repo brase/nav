@@ -39,6 +39,7 @@ void main() async {
           "pictureNumber"	INTEGER,
           "heading"	REAL,
           "distance"	REAL,
+          "used" INTEGER,
           PRIMARY KEY("id"));''',
     );
   }, version: 1);
