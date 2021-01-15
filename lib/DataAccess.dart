@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'WaypointProjectionView.dart';
 
+import 'dart:developer' as developer;
+
 class DataAccess {
   final Future<Database> _database;
 
@@ -8,11 +10,21 @@ class DataAccess {
 
   Future<void> insertWaypointProjection(WaypointProjection proj) async {
     final Database db = await _database;
-
+    developer.log("Insert: ${proj.id}");
     await db.insert(
       WaypointProjection.tableName,
       proj.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateWaypointProjection(WaypointProjection proj) async {
+    final Database db = await _database;
+    developer.log("Update: ${proj.id}");
+    await db.update(
+      WaypointProjection.tableName,
+      proj.toMap(),
+      where: "Id = ${proj.id}"
     );
   }
 
