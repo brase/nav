@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'DataAccess.dart';
 import 'WaypointProjectionView.dart';
 
@@ -169,6 +170,9 @@ class _MainViewState extends State<MainView> {
         title: Text("${projection.totalKilometers} km"),
         subtitle: Text(
             "Heading: ${projection.heading}° Distance: ${projection.distance} km"),
+        trailing: projection.used
+                  ?  Icon(Icons.check_box_outlined)
+                  :  Icon(Icons.check_box_outline_blank),
         onTap: () => _openProjection(projection),
       ),
       onDismissed: (direction) async {
@@ -201,7 +205,12 @@ class _MainViewState extends State<MainView> {
   void _openProjection(WaypointProjection projection) {
     Navigator.of(this.context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-      return WaypointProjectionView(projection);
+
+      final callback = (WaypointProjection proj) async {
+        await _dataAccess.updateWaypointProjection(proj);
+        setState(() {});
+      };
+      return WaypointProjectionView(projection: projection, updateProjection: callback, );
     }));
   }
 

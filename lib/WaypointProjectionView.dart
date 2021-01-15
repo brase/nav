@@ -3,7 +3,10 @@ import 'dart:developer' as developer;
 import 'package:geo/geo.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:nav/DataAccess.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'dart:developer' as developer;
 
 class WaypointProjection {
   WaypointProjection(
@@ -15,6 +18,7 @@ class WaypointProjection {
     this.pictureNumber = map["pictureNumber"];
     this.heading = map["heading"];
     this.distance = map["distance"];
+    this.used = map["used"] >= 1;
   }
 
   int id;
@@ -22,6 +26,7 @@ class WaypointProjection {
   int pictureNumber;
   double heading;
   double distance;
+  bool used;
 
   Map<String, dynamic> toMap() {
     return {
@@ -29,7 +34,8 @@ class WaypointProjection {
       'totalKilometers': totalKilometers,
       'pictureNumber': pictureNumber,
       'heading': heading,
-      'distance': distance
+      'distance': distance,
+      'used': used == true ? 1 : 0
     };
   }
 
@@ -37,29 +43,28 @@ class WaypointProjection {
 }
 
 class WaypointProjectionView extends StatefulWidget {
-  WaypointProjectionView(WaypointProjection projection) {
-    _projection = projection;
-  }
+  const WaypointProjectionView({
+    Key key,
+    this.projection,
+    this.updateProjection}):super(key: key);
 
-  WaypointProjection _projection;
+  final WaypointProjection projection;
+  final Future<void> Function(WaypointProjection) updateProjection;
 
   @override
   _WaypointProjectionStateView createState() =>
-      _WaypointProjectionStateView(_projection);
+      _WaypointProjectionStateView();
 }
 
 class _WaypointProjectionStateView extends State<WaypointProjectionView> {
-  _WaypointProjectionStateView(WaypointProjection projection) {
-    _projection = projection;
-  }
-
-  WaypointProjection _projection;
   Position _pos = Position();
 
   Timer _updateLocationTimer;
 
   @override
   Widget build(BuildContext context) {
+
+    developer.log("Show: ${widget.projection.id}");
     _updateLocationTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
       await Geolocator.getCurrentPosition().then((value) => {_pos = value});
       if (mounted) {
@@ -77,7 +82,7 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
           child: Column(children: [
             Container(
                 child: Center(
-                    child: Text("${_projection.totalKilometers.toString()} km",
+                    child: Text("${widget.projection.totalKilometers.toString()} km",
                         style: TextStyle(
                             fontSize: 80, fontWeight: FontWeight.bold)))),
             Container(
@@ -90,7 +95,7 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
                       children: [
                         Container(
                             child: Text(
-                              "C = ${_projection.heading.toString()}°",
+                              "C = ${widget.projection.heading.toString()}°",
                               style: valuesStyle,)),
                       ],
                     ),
@@ -98,7 +103,7 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
                       children: [
                         Container(
                             child:
-                                Text("L = ${_projection.distance.toString()} km", style: valuesStyle,)),
+                                Text("L = ${widget.projection.distance.toString()} km", style: valuesStyle,)),
                       ],
                     )
                   ],
@@ -116,16 +121,21 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
               child: RaisedButton(
                   child: Text("Share"),
                   onPressed: () async {
+                    widget.projection.used = true;
+                    await widget.updateProjection(widget.projection);
+
                     final LatLng destination = _computeDestination(
                         _pos.latitude,
                         _pos.longitude,
-                        _projection.heading,
-                        _projection.distance);
+                        widget.projection.heading,
+                        widget.projection.distance);
                     final geoUrl = Uri(
                         scheme: "geo",
                         path: "${destination.lat},${destination.lng}");
                     developer.log(geoUrl.toString());
                     await _launchURL(geoUrl.toString());
+
+                    Navigator.of(this.context).pop();
                   }),
             )
           ]),
