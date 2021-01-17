@@ -67,18 +67,6 @@ class _MainViewState extends State<MainView> {
               TextFormField(
                 keyboardType: TextInputType.number,
                 autocorrect: false,
-                validator: _validateInt,
-                decoration: InputDecoration(
-                  labelText: "Picture Number",
-                  border: OutlineInputBorder(),
-                ),
-                onSaved: (newValue) =>
-                    addModel.pictureNumber = int.parse(newValue),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                keyboardType: TextInputType.number,
-                autocorrect: false,
                 decoration: InputDecoration(
                   labelText: "heading (°)",
                   border: OutlineInputBorder(),

@@ -10,12 +10,11 @@ import 'dart:developer' as developer;
 
 class WaypointProjection {
   WaypointProjection(
-      {this.distance, this.heading, this.pictureNumber, this.totalKilometers});
+      {this.distance, this.heading, this.totalKilometers});
 
   WaypointProjection.fromMap(Map<String, dynamic> map) {
     this.id = map["id"];
     this.totalKilometers = map["totalKilometers"];
-    this.pictureNumber = map["pictureNumber"];
     this.heading = map["heading"];
     this.distance = map["distance"];
     this.used = map["used"] >= 1;
@@ -23,7 +22,6 @@ class WaypointProjection {
 
   int id;
   double totalKilometers;
-  int pictureNumber;
   double heading;
   double distance;
   bool used;
@@ -32,7 +30,6 @@ class WaypointProjection {
     return {
       'id': id,
       'totalKilometers': totalKilometers,
-      'pictureNumber': pictureNumber,
       'heading': heading,
       'distance': distance,
       'used': used == true ? 1 : 0

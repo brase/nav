@@ -36,7 +36,6 @@ void main() async {
       '''CREATE TABLE "WaypointProjection" (
 	        "id"	INTEGER,
           "totalKilometers"	REAL,
-          "pictureNumber"	INTEGER,
           "heading"	REAL,
           "distance"	REAL,
           "used" INTEGER,
