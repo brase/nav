@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:baseflow_plugin_template/baseflow_plugin_template.dart';
 import 'package:flutter/material.dart';
-import 'package:nav/WaypointProjectionView.dart';
+import 'package:rallynav/WaypointProjectionView.dart';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';

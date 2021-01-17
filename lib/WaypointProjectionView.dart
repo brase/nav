@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:geo/geo.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:nav/DataAccess.dart';
+import 'package:rallynav/DataAccess.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'dart:developer' as developer;
