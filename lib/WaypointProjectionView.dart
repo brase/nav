@@ -65,8 +65,12 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
   Widget build(BuildContext context) {
 
     developer.log("Show: ${widget.projection.id}");
+    //Initial Location
+    Geolocator.getCurrentPosition().then((value) => { _pos = value});
+
+    //Keep location updated
     _updateLocationTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
-      await Geolocator.getCurrentPosition().then((value) => {_pos = value});
+      _pos = await Geolocator.getCurrentPosition();
       if (mounted) {
         setState(() {});
       }
@@ -120,7 +124,7 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
             Container(
               child: RaisedButton(
                   child: Text("Share"),
-                  onPressed: () async {
+                  onPressed: _pos.accuracy != null && _pos.accuracy < 20 ? (() async { //disables button if pos is null
                     widget.projection.used = true;
                     await widget.updateProjection(widget.projection);
 
@@ -136,7 +140,7 @@ class _WaypointProjectionStateView extends State<WaypointProjectionView> {
                     await _launchURL(geoUrl.toString());
 
                     Navigator.of(this.context).pop();
-                  }),
+                  }) : null),
             )
           ]),
         ));

@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:sqflite/sqflite.dart';
 import 'DataAccess.dart';
 import 'WaypointProjectionView.dart';
+
+import 'dart:developer' as developer;
 
 class MainView extends StatefulWidget {
   final DataAccess _dataAccess;
