@@ -31,17 +31,17 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
 
-  geolocator: ^6.1.13
-  url_launcher: ^5.7.10
-  geo: ^0.2.4
+  geolocator: ^7.0.3
+  url_launcher: ^6.0.3
+  geo: ^0.3.0
 
   baseflow_plugin_template:
     git:
       url: git://github.com/Baseflow/baseflow_plugin_template.git
-      ref: v1.0.0
+      ref: v2.0.0-nullsafety
 
 dev_dependencies:
-  flutter_launcher_icons: "^0.8.1"
+  flutter_launcher_icons: ^0.9.0
   flutter_test:
     sdk: flutter
 
